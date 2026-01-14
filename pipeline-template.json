@@ -74,9 +74,7 @@
                                                                                                                      "Effect":  "Allow",
                                                                                                                      "Principal":  {
                                                                                                                                        "Service":  [
-                                                                                                                                                       "codepipeline.amazonaws.com",
-                                                                                                                                                       "codebuild.amazonaws.com",
-                                                                                                                                                       "cloudformation.amazonaws.com"
+                                                                                                                                                       "codepipeline.amazonaws.com"
                                                                                                                                                    ]
                                                                                                                                    },
                                                                                                                      "Action":  [
@@ -93,12 +91,6 @@
                                                                                                           "Statement":  [
                                                                                                                             {
                                                                                                                                 "Effect":  "Allow",
-                                                                                                                                "Action":  [
-                                                                                                                                               "s3:GetObject",
-                                                                                                                                               "s3:GetObjectVersion",
-                                                                                                                                               "s3:PutObject",
-                                                                                                                                               "s3:ListBucket"
-                                                                                                                                           ],
                                                                                                                                 "Resource":  [
                                                                                                                                                  {
                                                                                                                                                      "Fn::Sub":  "arn:${AWS::Partition}:s3:::${ArtifactBucket}"
@@ -106,29 +98,36 @@
                                                                                                                                                  {
                                                                                                                                                      "Fn::Sub":  "arn:${AWS::Partition}:s3:::${ArtifactBucket}/*"
                                                                                                                                                  }
-                                                                                                                                             ]
+                                                                                                                                             ],
+                                                                                                                                "Action":  [
+                                                                                                                                               "s3:GetObject",
+                                                                                                                                               "s3:GetObjectVersion",
+                                                                                                                                               "s3:PutObject",
+                                                                                                                                               "s3:ListBucket"
+                                                                                                                                           ]
                                                                                                                             },
                                                                                                                             {
                                                                                                                                 "Effect":  "Allow",
+                                                                                                                                "Resource":  "*",
                                                                                                                                 "Action":  [
                                                                                                                                                "codebuild:BatchGetBuilds",
                                                                                                                                                "codebuild:StartBuild"
-                                                                                                                                           ],
-                                                                                                                                "Resource":  "*"
+                                                                                                                                           ]
                                                                                                                             },
                                                                                                                             {
                                                                                                                                 "Effect":  "Allow",
-                                                                                                                                "Action":  [
-                                                                                                                                               "codestar-connections:UseConnection"
-                                                                                                                                           ],
                                                                                                                                 "Resource":  [
                                                                                                                                                  {
                                                                                                                                                      "Ref":  "CodeStarConnectionArn"
                                                                                                                                                  }
-                                                                                                                                             ]
+                                                                                                                                             ],
+                                                                                                                                "Action":  [
+                                                                                                                                               "codestar-connections:UseConnection"
+                                                                                                                                           ]
                                                                                                                             },
                                                                                                                             {
                                                                                                                                 "Effect":  "Allow",
+                                                                                                                                "Resource":  "*",
                                                                                                                                 "Action":  [
                                                                                                                                                "cloudformation:CreateStack",
                                                                                                                                                "cloudformation:UpdateStack",
@@ -136,31 +135,26 @@
                                                                                                                                                "cloudformation:ExecuteChangeSet",
                                                                                                                                                "cloudformation:DeleteChangeSet",
                                                                                                                                                "cloudformation:Describe*"
-                                                                                                                                           ],
-                                                                                                                                "Resource":  "*"
+                                                                                                                                           ]
                                                                                                                             },
                                                                                                                             {
                                                                                                                                 "Effect":  "Allow",
+                                                                                                                                "Resource":  [
+                                                                                                                                                 {
+                                                                                                                                                     "Fn::GetAtt":  [
+                                                                                                                                                                        "CloudFormationRole",
+                                                                                                                                                                        "Arn"
+                                                                                                                                                                    ]
+                                                                                                                                                 }
+                                                                                                                                             ],
+                                                                                                                                "Condition":  {
+                                                                                                                                                  "StringEquals":  {
+                                                                                                                                                                       "iam:PassedToService":  "cloudformation.amazonaws.com"
+                                                                                                                                                                   }
+                                                                                                                                              },
                                                                                                                                 "Action":  [
-                                                                                                                                               "logs:CreateLogGroup",
-                                                                                                                                               "logs:CreateLogStream",
-                                                                                                                                               "logs:PutLogEvents"
-                                                                                                                                           ],
-                                                                                                                                "Resource":  "*"
-                                                                                                                            },
-                                                                                                                            {
-                                                                                                                                "Effect":  "Allow",
-                                                                                                                                "Action":  [
-                                                                                                                                               "cloudformation:ValidateTemplate"
-                                                                                                                                           ],
-                                                                                                                                "Resource":  "*"
-                                                                                                                            },
-                                                                                                                            {
-                                                                                                                                "Effect":  "Allow",
-                                                                                                                                "Action":  [
-                                                                                                                                               "s3:*"
-                                                                                                                                           ],
-                                                                                                                                "Resource":  "*"
+                                                                                                                                               "iam:PassRole"
+                                                                                                                                           ]
                                                                                                                             }
                                                                                                                         ]
                                                                                                       }
@@ -176,7 +170,7 @@
                                                                        },
                                                               "ServiceRole":  {
                                                                                   "Fn::GetAtt":  [
-                                                                                                     "PipelineRole",
+                                                                                                     "CodeBuildRole",
                                                                                                      "Arn"
                                                                                                  ]
                                                                               },
@@ -307,7 +301,13 @@
                                                                                                                                          "Ref":  "StackName"
                                                                                                                                      },
                                                                                                                        "Capabilities":  "CAPABILITY_NAMED_IAM",
-                                                                                                                       "TemplatePath":  "SourceOutput::infra/infra-template.json"
+                                                                                                                       "TemplatePath":  "SourceOutput::infra/infra-template.json",
+                                                                                                                       "RoleArn":  {
+                                                                                                                                       "Fn::GetAtt":  [
+                                                                                                                                                          "CloudFormationRole",
+                                                                                                                                                          "Arn"
+                                                                                                                                                      ]
+                                                                                                                                   }
                                                                                                                    },
                                                                                                  "InputArtifacts":  [
                                                                                                                         {
@@ -320,7 +320,109 @@
                                                                          }
                                                                      ]
                                                       }
-                                   }
+                                   },
+                      "CodeBuildRole":  {
+                                            "Properties":  {
+                                                               "AssumeRolePolicyDocument":  {
+                                                                                                "Version":  "2012-10-17",
+                                                                                                "Statement":  [
+                                                                                                                  {
+                                                                                                                      "Effect":  "Allow",
+                                                                                                                      "Principal":  {
+                                                                                                                                        "Service":  [
+                                                                                                                                                        "codebuild.amazonaws.com"
+                                                                                                                                                    ]
+                                                                                                                                    },
+                                                                                                                      "Action":  [
+                                                                                                                                     "sts:AssumeRole"
+                                                                                                                                 ]
+                                                                                                                  }
+                                                                                                              ]
+                                                                                            },
+                                                               "Policies":  [
+                                                                                {
+                                                                                    "PolicyDocument":  {
+                                                                                                           "Version":  "2012-10-17",
+                                                                                                           "Statement":  [
+                                                                                                                             {
+                                                                                                                                 "Effect":  "Allow",
+                                                                                                                                 "Resource":  [
+                                                                                                                                                  {
+                                                                                                                                                      "Fn::Sub":  "arn:${AWS::Partition}:s3:::${ArtifactBucket}"
+                                                                                                                                                  },
+                                                                                                                                                  {
+                                                                                                                                                      "Fn::Sub":  "arn:${AWS::Partition}:s3:::${ArtifactBucket}/*"
+                                                                                                                                                  }
+                                                                                                                                              ],
+                                                                                                                                 "Action":  [
+                                                                                                                                                "s3:GetObject",
+                                                                                                                                                "s3:GetObjectVersion",
+                                                                                                                                                "s3:PutObject",
+                                                                                                                                                "s3:ListBucket"
+                                                                                                                                            ]
+                                                                                                                             },
+                                                                                                                             {
+                                                                                                                                 "Effect":  "Allow",
+                                                                                                                                 "Resource":  "*",
+                                                                                                                                 "Action":  [
+                                                                                                                                                "logs:CreateLogGroup",
+                                                                                                                                                "logs:CreateLogStream",
+                                                                                                                                                "logs:PutLogEvents"
+                                                                                                                                            ]
+                                                                                                                             },
+                                                                                                                             {
+                                                                                                                                 "Effect":  "Allow",
+                                                                                                                                 "Resource":  "*",
+                                                                                                                                 "Action":  [
+                                                                                                                                                "cloudformation:ValidateTemplate"
+                                                                                                                                            ]
+                                                                                                                             }
+                                                                                                                         ]
+                                                                                                       },
+                                                                                    "PolicyName":  "CodeBuildInline"
+                                                                                }
+                                                                            ]
+                                                           },
+                                            "Type":  "AWS::IAM::Role"
+                                        },
+                      "CloudFormationRole":  {
+                                                 "Properties":  {
+                                                                    "AssumeRolePolicyDocument":  {
+                                                                                                     "Version":  "2012-10-17",
+                                                                                                     "Statement":  [
+                                                                                                                       {
+                                                                                                                           "Effect":  "Allow",
+                                                                                                                           "Principal":  {
+                                                                                                                                             "Service":  [
+                                                                                                                                                             "cloudformation.amazonaws.com"
+                                                                                                                                                         ]
+                                                                                                                                         },
+                                                                                                                           "Action":  [
+                                                                                                                                          "sts:AssumeRole"
+                                                                                                                                      ]
+                                                                                                                       }
+                                                                                                                   ]
+                                                                                                 },
+                                                                    "Policies":  [
+                                                                                     {
+                                                                                         "PolicyDocument":  {
+                                                                                                                "Version":  "2012-10-17",
+                                                                                                                "Statement":  [
+                                                                                                                                  {
+                                                                                                                                      "Effect":  "Allow",
+                                                                                                                                      "Resource":  "*",
+                                                                                                                                      "Action":  [
+                                                                                                                                                     "s3:*"
+                                                                                                                                                 ]
+                                                                                                                                  }
+                                                                                                                              ]
+                                                                                                            },
+                                                                                         "PolicyName":  "CloudFormationDeployInline"
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                 "Type":  "AWS::IAM::Role"
+                                             }
                   },
     "Outputs":  {
                     "PipelineName":  {
