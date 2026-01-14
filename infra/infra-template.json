@@ -5,6 +5,7 @@
     "AppBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
+        "BucketName": "AppBucket",
         "PublicAccessBlockConfiguration": {
           "BlockPublicAcls": true,
           "BlockPublicPolicy": true,
