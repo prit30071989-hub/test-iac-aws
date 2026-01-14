@@ -1,0 +1,33 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Sample infra stack: secure S3 bucket to validate the pipeline flow.",
+  "Resources": {
+    "AppBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            { "ServerSideEncryptionByDefault": { "SSEAlgorithm": "AES256" } }
+          ]
+        },
+        "VersioningConfiguration": { "Status": "Enabled" },
+        "Tags": [
+          { "Key": "Stack", "Value": { "Ref": "AWS::StackName" } }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "BucketName": {
+      "Description": "Created S3 bucket name",
+      "Value": { "Ref": "AppBucket" }
+    }
+  }
+}
+
