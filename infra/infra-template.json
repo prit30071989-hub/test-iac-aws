@@ -2,10 +2,10 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Sample infra stack: secure S3 bucket to validate the pipeline flow.",
   "Resources": {
-    "AppBucket": {
+    "AppBucket01": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": "appbucket",
+        "BucketName": "appbucket01",
         "PublicAccessBlockConfiguration": {
           "BlockPublicAcls": true,
           "BlockPublicPolicy": true,
@@ -27,7 +27,7 @@
   "Outputs": {
     "BucketName": {
       "Description": "Created S3 bucket name",
-      "Value": { "Ref": "AppBucket" }
+      "Value": { "Ref": "AppBucket01" }
     }
   }
 }
